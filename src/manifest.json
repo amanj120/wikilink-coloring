@@ -1,0 +1,10 @@
+{
+    "name": "WikiLink Coloring",
+    "description": "Highlight hyperlinked Wikipedia articles based on quality",
+    "version": "1.0",
+    "manifest_version": 3,
+    "permissions": ["storage", "activeTab", "scripting"],
+    "action": {
+      "default_popup": "popup.html"
+    }
+  }
