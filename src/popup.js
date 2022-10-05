@@ -12,6 +12,19 @@ actionButton.addEventListener("click", async () => {
 // main business logic goes here
 function highlightWikiLinks() {
 
+	// returns the number of redirects to a page
+	// this is capped at 1024 because we have to query the number of links we want
+	// and asking for more increses computational complexity
+	async function getRedirects(url) {
+		let infoUrl = url.replace("/wiki/", "/w/index.php?title=Special:WhatLinksHere/").concat("&namespace=0&hideredirs=1&hidetrans=1&limit=1024");
+		const response = await fetch(infoUrl);
+		const data = await response.text();
+		let tmp = data.match(/Displayed .* items/)[0];
+		let redirectsStr = tmp.replace("Displayed ", "").replace(" items", "");
+		let redirects = parseInt(redirectsStr.replaceAll(",", ""));
+		return redirects;
+	}
+
 	// returns the number of views a wiki page 
 	async function getPageViews(url) {
 		let infoUrl = url.replace("/wiki/", "/w/index.php?title=").concat("&action=info");
@@ -24,15 +37,9 @@ function highlightWikiLinks() {
 		return pageViews;
 	}
 
-	// assigns a color to the number of views based on a logarithmic scale
-	function getColorFromPageViews(pageViews) {
-		if (pageViews < 128) {
-			pageViews = 128;
-		} else if (pageViews > 1048576) {
-			pageViews = 1048576;
-		}
-		let strength = Math.floor(((Math.log2(pageViews) - 7) * 511.0)/13.0); 
-			
+	// assigns a color from red to green given a float in [0, 1]
+	function getColorFromFloat(input) {
+		let strength = Math.floor(input * 511.0)
 		if (strength < 256) {
 			return 'rgb(255, ' + strength + ', 0)';
 		} else {
@@ -59,21 +66,25 @@ function highlightWikiLinks() {
 	}
 
 	const urlMapEntries = urlMap.entries();
-	const linkColorId = setInterval(() => {
+	const linkColorThreadId = setInterval(async () => {
 		let entry = urlMapEntries.next();
 		if (entry.done == true) {
-			clearInterval(linkColorId);
-		} else {
-			let href = entry.value[0];
-			let tags = entry.value[1];
-
-			getPageViews(href).then((pageViews) => {
-				let color = getColorFromPageViews(pageViews);
-				for (let tag of tags) {
-					tag.style.backgroundColor = color;
-				}
-				console.log(href, pageViews);
-			});
+			clearInterval(linkColorThreadId);
 		}
+
+		let href = entry.value[0];
+		let tags = entry.value[1];
+
+		let pageViews = await getPageViews(href);
+		let redirects = await getRedirects(href);
+
+		console.log(href, "redirects: ", redirects, "pageViews: ", pageViews);
+
+		/* TODO: change the highlight color of the link:
+			for (let tag of tags) {
+				// let color = <some calculation here>
+				tag.style.backgroundColor = color;
+			}
+		*/
 	}, 50);
 }
