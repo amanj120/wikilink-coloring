@@ -15,7 +15,7 @@ I totally forgot this thing existed, but here's what I've done so far:
     * "true" performance could be:
         * number of bidirectional one hop paths (source - hop - sink) between the two pages
     * we want to avoid "parent" topics:
-        * i.e. Georgia Tech's "parent" could be University, but that doesn't provide too much information
+        * i.e. Georgia Tech's "parent" could be Georgia, but that doesn't provide too much information
 * Wikipedia is essentially a directed graph, what information do we want to extract from it?
     * Source: A, Target C:
     * let n' = set of paths A -> X -> C

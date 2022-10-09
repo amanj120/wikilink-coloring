@@ -12,9 +12,7 @@ actionButton.addEventListener("click", async () => {
 // main business logic goes here
 function highlightWikiLinks() {
 
-	// returns the number of redirects to a page
-	// this is capped at 5000 because we have to query the number of links we want
-	// and asking for more increses computational complexity
+	// returns the number of redirects to a page capped at 5000
 	async function getRedirects(url) {
 		let infoUrl = url.replace("/wiki/", "/w/index.php?title=Special:WhatLinksHere/").concat("&namespace=0&hideredirs=1&hidetrans=1&limit=5000");
 		const response = await fetch(infoUrl);
@@ -25,7 +23,7 @@ function highlightWikiLinks() {
 		return redirects;
 	}
 
-	// returns the number of views a wiki page 
+	// returns the number of views a page has had in the past 30 days
 	async function getPageViews(url) {
 		let infoUrl = url.replace("/wiki/", "/w/index.php?title=").concat("&action=info");
 		const response = await fetch(infoUrl);
@@ -35,6 +33,32 @@ function highlightWikiLinks() {
 			.replace("</div>", "");
 		let pageViews = parseInt(tmp.replaceAll(",", ""));
 		return pageViews;
+	}
+
+	async function getLinkSimilarity(url, parentUrls) {
+		const response = await fetch(url);
+		const data = response.body;
+		console.log(data);
+		// const paragraphs = data.getElementById("bodyContent").getElementsByTagName("p");
+		// const childUrls = new Set();
+		// let similar = 0.0;
+		// let total = 0.0;
+		// for (let p of paragraphs) {
+		// 	console.log(url, p);
+		// 	let urls = p.getElementsByTagName("a");
+		// 	if (/\/wiki\/[^:#]*$/.test(url.href) == true) {
+		// 		let urlHref = url.href;
+		// 		if (childUrls.has(urlHref) == false) {
+		// 			total += 1.0;
+		// 			childUrls.add(urlHref);
+		// 			if (parentUrls.has(urlHref)) {
+		// 				similar += 1.0;
+		// 			}
+		// 		}
+		// 	}
+		// }
+		// return similar / total;
+		return 1.0;
 	}
 
 	// assigns a color from red to green given a float in [0, 1]
@@ -51,19 +75,23 @@ function highlightWikiLinks() {
 		return; // The extension only works on wikipedia pages
 	} 
 	
-	const urls = document.getElementById("bodyContent").getElementsByTagName("a")
+	const paragraphs = document.getElementById("bodyContent").getElementsByTagName("p")
 	const urlMap = new Map();
 
-	// TODO: filter to include links with "#" that aren't the same page
-	for (let url of urls) {
-		if (/\/wiki\/[^:#]*$/.test(url.href) == true) {
-			let urlHref = url.href;
-			if (urlMap.has(urlHref) == false) {
-				urlMap.set(urlHref, new Array());
+	for (let p of paragraphs) {
+		let urls = p.getElementsByTagName("a");
+		for (let url of urls) {
+			if (/\/wiki\/[^:#]*$/.test(url.href) == true) {
+				let urlHref = url.href;
+				if (urlMap.has(urlHref) == false) {
+					urlMap.set(urlHref, new Array());
+				}
+				urlMap.get(urlHref).push(url);
+				url.style.backgroundColor = "#FF0000";
 			}
-			urlMap.get(urlHref).push(url);
 		}
 	}
+
 
 	const urlMapEntries = urlMap.entries();
 	const linkColorThreadId = setInterval(async () => {
@@ -77,8 +105,11 @@ function highlightWikiLinks() {
 
 		let pageViews = await getPageViews(href);
 		let redirects = await getRedirects(href);
+		let similarity = await getLinkSimilarity(href, urlMap);
 
 		console.log(href, "redirects: ", redirects, "pageViews: ", pageViews);
+
+
 
 		/* TODO: change the highlight color of the link:
 			for (let tag of tags) {
