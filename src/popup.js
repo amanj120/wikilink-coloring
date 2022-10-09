@@ -13,10 +13,10 @@ actionButton.addEventListener("click", async () => {
 function highlightWikiLinks() {
 
 	// returns the number of redirects to a page
-	// this is capped at 1024 because we have to query the number of links we want
+	// this is capped at 5000 because we have to query the number of links we want
 	// and asking for more increses computational complexity
 	async function getRedirects(url) {
-		let infoUrl = url.replace("/wiki/", "/w/index.php?title=Special:WhatLinksHere/").concat("&namespace=0&hideredirs=1&hidetrans=1&limit=1024");
+		let infoUrl = url.replace("/wiki/", "/w/index.php?title=Special:WhatLinksHere/").concat("&namespace=0&hideredirs=1&hidetrans=1&limit=5000");
 		const response = await fetch(infoUrl);
 		const data = await response.text();
 		let tmp = data.match(/Displayed .* items/)[0];
