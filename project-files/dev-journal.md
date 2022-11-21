@@ -30,3 +30,25 @@ I totally forgot this thing existed, but here's what I've done so far:
     * direct_backward_path = 1 if C -> A exists, else 0
     * we can easily calculate n', m', s, and t. n and m are harder to calculate
 * Maybe take a look at this: https://www.mediawiki.org/wiki/API:REST_API
+
+# 2022-10-09:
+* What if we looked at paths: A -> C -> C' where A -> C' exists
+* Actually, let's just download a wiki data dump and store it somewhere and work with that instead, that way we're not limited by Wiki's 429 HTTP errors, and we can stop using fucking javascript. 
+    * https://dumps.wikimedia.org/
+    * we can just use this for a somewhat up to date model, and use the actual (n'/n) and (m'/m) and back_path metrics
+    
+# 2022-10-10: 
+* I created a python script to convert a wikipedia dump into a directed graph of articles
+* scp enwiki-20221001-pages-articles-multistream-index.txt ajain471@login-phoenix.pace.gatech.edu:/storage/scratch1/1/ajain471/cs6235/
+* scp enwiki-20221001-pages-articles-multistream.xml.bz2 ajain471@login-phoenix.pace.gatech.edu:/storage/scratch1/1/ajain471/cs6235/
+* scp wikiToGraph.py ajain471@login-phoenix.pace.gatech.edu:/storage/scratch1/1/ajain471/cs6235/
+* [ajain471@login-coc-ice-1 ~]$ qsub -I -N AMAN-6235 -q coc-ice-long -l mem=127g,nodes=1:ppn=1,walltime=8:00:00,file=127g
+* This is to run the job in COC-ICE 
+* https://dumps.wikimedia.org/enwiki/20221001/enwiki-20221001-pages-articles-multistream.xml.bz2
+* I uploaded the files to google cloud storage:
+    * https://storage.googleapis.com/wikilink-coloring-dump-info/enwiki-20221001-pages-articles-multistream-index.txt
+    * https://storage.googleapis.com/wikilink-coloring-dump-info/enwiki-20221001-pages-articles-multistream.xml.bz2
+
+# 2022-10-28
+* Alright buckle up fuckwads cuz a lot has happened lately and i got a story to tell y'all
+So essentially this big ass wikipedia dump is 100 gigabytes right, pretty big. there were a couple issues, the biggest being that 100 GB of text is a lot of text. So, i split up this dump processing pipeline into a couple steps. The first step is to iterate through the multistream for each 100-page chunk and for each page, check if it's an article or redirect in namespace 0. namespace 0 means actual pages, not categories or files or wtv. This also requires a funky little regex thing to figure out the links from the wiki XML. originally this took forever, but I managed to make the program multi-processed and I ran it on PACE using a whopping 256 GB of RAM and 16 cores, and it still took like an hour to do that. That's how we ended up with a bunch of these little outputEdges-X.json and redirects-X.json files. 
