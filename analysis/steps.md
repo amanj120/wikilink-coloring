@@ -32,6 +32,7 @@
     * `tar -czvf export.tar.gz export/`
     * `mv export.tar.gz ~`
     * and then on the local machine: `scp ajain471@coc-ice.pace.gatech.edu:~/export.tar.gz ~/export.tar.gz`
+* everything up to this point (minus the scp command) can be automated into a single shell script, but i haven't gotten around to doing that. This manual should be instructive enough.
 * upon exporting the tar to your local machine, you can now work on uploading the graph to redis
     * download redis server and start the instance
         * https://redis.io/download/
