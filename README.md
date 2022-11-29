@@ -50,8 +50,14 @@ Class project for CS 6235: Real-Time Systems during Fall 2022 at Georgia Tech
     * move the export file to the working directory with phase4.ipynb
     * extract the export: `tar -xzvf export.tar.gz`
     * run `python3 phase4.py` to upload graph to redis
+    * After this, the graph should be uploaded to redis and the redis server should be running in the background
 * after running phase4, the graph is entirely uploaded to redis, and redis will make sure that the database is saved to a dump file
     * on macOS, the dump is at `/opt/homebrew/var/db/redis/dump.rdb` and can be uploaded to a cloud provider or something as a backup
 * now you can run the server: `python3 server.py` to spin up the flask server that will be serving the requests
     * once again, this can be uploaded to a cloud provider or something instead of being run locally
+    * This flask server, running alongside redis, should be enough for the chrome extension to work
+* To load the chrome extension, follow these steps: 
+    * Open a chrome browser and type in `chrome://extensions` into the search tab
+    * Click "Load Unpacked" and then open the `wikilink-coloring/src` directory
+    * The extension should appear on your chrome extensions tab thingy at the top right, and now you can use the extension by navigating to any english wikipedia page and then clicking on the extentions and clicking "Enable" on the extension popup. 
 
