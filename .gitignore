@@ -1,2 +1,4 @@
 # don't include any of the large preprocessing files
+*.DS_Store
 export*
+*.rdb
